@@ -34,7 +34,7 @@ The first implementation ([v0.1](https://github.com/prontog/multifwf/releases/ta
 
 The function is available on CRAN in the package [multifwf](https://cran.r-project.org/web/packages/multifwf/index.html) and the source code in [Github](https://github.com/prontog/multifwf).
 
-Here's an example on how to use *read.multi.fwf*:
+Here's an example on how to use **read.multi.fwf**:
 
 ```{r, example}
 library(multifwf)
