@@ -30,7 +30,11 @@ Before starting with the implementation, I studied *read.fwf* thoroughly and dec
 
 The first implementation ([v0.1](https://github.com/prontog/multifwf/releases/tag/v0.1)) was buggy because of an optimization during the handling of the temp files (from step 1 of the design). To write to these files I use the *cat* function for each line read from the whole file. Instead of calling *cat* with the temp filename as parameter *file*, I used *connection objects* (think of it as file descriptors). This meant that I had to use the *open* function to open each temp file, use the *connection* and close it (using the *close* function) before returning. This might sound simple but in reality it wasn't. Although the function returned the correct result, some files were left opened (and were eventually closed by R) while others were closed multiple times (throwing exceptions). After trying to debug this for a while, I gave up and used *cat* with filenames instead of file handles, which solved the problem. In hidsight, this was a classic case of premature optimization. On the downside, I measured, a performance drop of around 20% which, to be honest, is fine by me.
 
-The function is available on CRAN in the package [multifwf](https://cran.r-project.org/web/packages/multifwf/index.html). Here's an example on how to use *read.multi.fwf*:
+> Did you know: That you can see the source of an R function simply by typing its name on the R console?
+
+The function is available on CRAN in the package [multifwf](https://cran.r-project.org/web/packages/multifwf/index.html) and the source code in [Github](https://github.com/prontog/multifwf).
+
+Here's an example on how to use *read.multi.fwf*:
 
 ```{r, example}
 library(multifwf)
@@ -93,4 +97,3 @@ read.multi.fwf(ff, multi.specs = specs, select = myselector)
 unlink(ff)
 ```
 
-You will find the source in [Github](https://github.com/prontog/multifwf).
