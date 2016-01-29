@@ -50,7 +50,7 @@ As we can see:
 
 1. The 'Phone' field is of type **REPEATING**. This signifies a repeating group.
 2. The *Length* of the 'Phone' field is not a number, but it references another field in the message.
-3. There is no end to the repeating group so there should be no fields after it. A limitation of the current implementation.
+3. The end of the repeating group is implicitly the last field of the message. Otherwise we need to add a "fake" field with type **REPEATING-END**. Then the group will contain all fields between the ones with type REPEATING and REPEATING-END.
 
 The third dissector was for a protocol that containing string of variable length. I added the type **VARLEN**. Fields of this type have to reference another field that specifies their length. The same way a repeating group references the number of repeats:
 
