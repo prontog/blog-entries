@@ -15,17 +15,17 @@ fi
 
 awk '
 # Get the header containing the message type in parentheses.
-/##### / {
+/### / {
 	header = $0
-	match(header, /.*\((.*)\).*/, results)
+	match(header, /^### ([A-Z]{2}) /, results)
 	messageType = results[1]
 	if (messageType) {
-		spec_file = sprintf("%s_spec.mdtable", messageType)
+		spec_file = sprintf("%s.mdtable", messageType)
 		print "" > spec_file
 	}
 }
 # Print the message table into a different file.
-/^\| \*\*/,/^$/{
+/^\| /,/^$/{
 	if (messageType) {
 		print >> spec_file
 	}

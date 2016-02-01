@@ -1,5 +1,5 @@
-sop_types := A C D E EB G I L M N O P Q R T
-sop_types_not_supported := B F H S U
+sop_types := NO OC TR RJ EN BO
+sop_types_not_supported := LO
 sop_mdtables := $(foreach t, $(sop_types), $(t).mdtable)
 sop_specs := $(foreach t, $(sop_types), $(t).csv)
 sop_md := sop.md
