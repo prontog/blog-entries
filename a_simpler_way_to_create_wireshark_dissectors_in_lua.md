@@ -66,13 +66,15 @@ Here we see that:
 2. The *Length* of the 'Last name' field is not a number, but it references another field in the message.
 3. Other fields can follow a 'VARLEN' field.
 
-Naturally, the implementation of dissectors for three protocols helped me locate more parts that could be moved to the common module named **ws_dissector_helper**. The source code is available on [Github](https://github.com/prontog/ws_dissector_helper).
+Naturally, the implementation of dissectors for three protocols helped me locate more parts that could be moved to the common module named **ws_dissector_helper**.
 
 > Did you know: That Wireshark can be used in the command line with the [TShark](https://www.wireshark.org/docs/man-pages/tshark.html) utility?
 
-### Creating you own dissector
+### How to use it
 
-Here's an example on how to use *ws_dissector_helper* an imaginary protocol called [SOP](https://github.com/prontog/ws_dissector_helper/tree/master/examples/README.md)(Simple Order Protocol):
+The source code is available on [Github](https://github.com/prontog/ws_dissector_helper). You can clone the repo or download it as a zip file.
+
+Here's an example on how *ws_dissector_helper* can help create a Wireshark dissector for an imaginary protocol called [SOP](https://github.com/prontog/ws_dissector_helper/tree/master/examples/README.md)(Simple Order Protocol):
 
 Create a lua script for our new dissector. Let's name it *sop.lua* since the dissector we will create will be for the SOP protocol (an imaginary protocol used in this example).
 
@@ -145,6 +147,7 @@ Now let's load the specs using the `loadSpecs` function of the `helper` object. 
 1. msgTypes		this is a table of message types. Each type has two properties: name and file.
 1. dir			the directory were the CSV files are located
 1. columns is a table with the mapping of columns:
+
 	- name is the name of the field name column. 
 	- length is the name of the field legth column. 
 	- type is the name of the field type column. Optional. Defaults to STRING.
