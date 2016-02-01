@@ -1,8 +1,16 @@
 During the last couple of years, I've been relearning statistics through various online courses most of which had assignments in the [R programming language](https://www.r-project.org/about.html). Soon enough I grew fond of the simplicity of the language, of its powerful interpreter, of its documentation and base library with its many useful functions for importing, analyzing, plotting and exporting data.
 
+### Why (create a tool)
+
 As I was exploring the import functions (most of them are named read.*XXX*) I fell across [read.fwf](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.fwf.html) that reads files with lines of fixed width format. You just pass it a filename and two vectors, one with the name of the columns and another with the size (in characters) of its column. It returns a data.frame with each line split into columns. Nice! In the company where I work we maintain several text protocols for inter-process communication, and one of them is fixed width. Yoo-Hoo, I could read a log file into R and fool around with it. But wait, I forgot, these logs are more complicated. Each line is fixed width, but the protocol includes different message types each one with different formatting. This means that the log file has lines of different fixed width format and *read.fwf* cannot handle such a file. What I needed was a function capable of handling multiple fixed width formats in a single file. Searching in R's *base* package, [CRAN](https://cran.r-project.org), Github and Google didn't result anything useful.
 
-I decided to create it myself and try building it around *read.fwf* since the base package developers have made such a good job with it. After some thought, I arrived at the following design:
+### How
+
+I decided to create it myself and try building it around *read.fwf* since the base package developers have made such a good job with it.
+
+#### Design
+
+After some thought, I arrived at the following design:
 
 1.  Split the file according to message type.
 2.  Read each new file with *read.fwf*.
@@ -13,9 +21,13 @@ So instead of passing the *name* and *width* vectors I would pass a *list* of na
 
 Before starting with the implementation, I studied *read.fwf* thoroughly and decided to follow its basic structure and argument handling.
 
+#### Implementation
+
 The first implementation ([v0.1](https://github.com/prontog/multifwf/releases/tag/v0.1)) was buggy because of an optimization during the handling of the temp files (from step 1 of the design). To write to these files I use the *cat* function for each line read from the whole file. Instead of calling *cat* with the temp filename as parameter *file*, I used *connection objects* (think of it as file descriptors). This meant that I had to use the *open* function to open each temp file, use the *connection* and close it (using the *close* function) before returning. This might sound simple but in reality it wasn't. Although the function returned the correct result, some files were left opened (and were eventually closed by R) while others were closed multiple times (throwing exceptions). After trying to debug this for a while, I gave up and used *cat* with filenames instead of file handles, which solved the problem. In hidsight, this was a classic case of premature optimization. On the downside, I measured, a performance drop of around 20% which, to be honest, is fine by me.
 
 > Did you know: That you can see the source of an R function simply by typing its name on the R console?
+
+### How to use it
 
 The function is available on CRAN in the package [multifwf](https://cran.r-project.org/web/packages/multifwf/index.html) and the source code in [Github](https://github.com/prontog/multifwf).
 
