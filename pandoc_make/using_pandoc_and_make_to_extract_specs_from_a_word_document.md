@@ -113,14 +113,12 @@ For the implemenation I decided to use [GNU make](https://www.gnu.org/software/m
 
 ```
 sop_types := NO OC TR RJ EN BO
-sop_types_not_supported := LO
 sop_mdtables := $(foreach t, $(sop_types), $(t).mdtable)
 sop_specs := $(foreach t, $(sop_types), $(t).csv)
 sop_md := sop.md
 
 sop: $(sop_specs)
 	./sop_update_csv.sh $? && touch $@
-	echo $(sop_types_not_supported) are not supported. Please make sure you update their CSV manually.
 
 %.csv: %.mdtable
 	./mdtable_to_csv.sh $?
@@ -155,16 +153,15 @@ Note that:
 2. Rule `$(sop_mdtables): $(sop_md)` is for extracting the *mdtable* files from a single *md*. This is done by BASH script [sop_split_to_mdtable.sh](https://github.com/prontog/blog-entries/blob/master/pandoc_make/sop_split_to_mdtable.sh).
 3. Rule `%.csv: %.mdtable` is for converting from *mdtable* to *csv*. This is done by BASH script [mdtable_to_csv.sh
 ](https://github.com/prontog/blog-entries/blob/master/pandoc_make/mdtable_to_csv.sh).
-4. Rule `sop: $(sop_specs)` is the final rule that executes BASH script [sop_update_csv.sh](https://github.com/prontog/blog-entries/blob/master/pandoc_make/sop_update_csv.sh) on each CSV included in variable `sop_specs`. This final part replaces the '|' separator with ','. This last part could be ommited or moved to the previous rule.
+4. Rule `sop: $(sop_specs)` is the final rule that simply touches the dummy file *sop*. It also warns about not supported types. This
 5. The rest of the rules are for cleaning up.
 
 ### How to try it yourself
 
-1. Install Pandoc sudo dpkg --install pandoc-1.15.2-1-amd64.deb
-1. Install pandocfilters  pip install pandocfilters
+1. Install [Pandoc](http://pandoc.org/installing.html).
+1. Install [pandocfilters](https://pypi.python.org/pypi/pandocfilters)
 1. Download archive [blog-entries](https://github.com/prontog/blog-entries/archive/master.zip)
 1. Unzip master.zip
 1. cd blog-entries/pandoc_make
 1. make clean
 1. make
-

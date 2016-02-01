@@ -1,12 +1,10 @@
 sop_types := NO OC TR RJ EN BO
-sop_types_not_supported := LO
 sop_mdtables := $(foreach t, $(sop_types), $(t).mdtable)
 sop_specs := $(foreach t, $(sop_types), $(t).csv)
 sop_md := sop.md
 
 sop: $(sop_specs)
-	./sop_update_csv.sh $? && touch $@
-	echo $(sop_types_not_supported) are not supported. Please make sure you update their CSV manually.
+	touch $@
 
 %.csv: %.mdtable
 	./mdtable_to_csv.sh $?

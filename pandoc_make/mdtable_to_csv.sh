@@ -30,5 +30,7 @@ for f in $@; do
 	# Trim middle |.
 	s/[[:space:]]*|[[:space:]]*/|/g
 	# Delete empty rows.
-	/^$/d' $f > ${f/$".mdtable"/.csv}
+	/^$/d
+	# Replace | separator with ,
+	s/|/,/g' $f > ${f/$".mdtable"/.csv}
 done
