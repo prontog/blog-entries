@@ -6,10 +6,10 @@ As I've mentioned in earlier posts, in the company where I work we maintain seve
 
 | Field         | Length | Type    | Description                                                 |
 |---------------|--------|---------|-------------------------------------------------------------|
-| msgType       | 2      |         | Defines message type ALWAYS FIRST FIELD IN MESSAGE PAYLOAD. |
-| clientId      | 16     |         | Unique identifier for Order as assigned by the client.      |
+| msgType       | 2      | STRING  | Defines message type ALWAYS FIRST FIELD IN MESSAGE PAYLOAD. |
+| clientId      | 16     | STRING  | Unique identifier for Order as assigned by the client.      |
 | rejectionCode | 3      | NUMERIC | Rejection Code                                              |
-| text          | 48     |         | Text explaining the rejection                               |
+| text          | 48     | STRING  | Text explaining the rejection                               |
 
 #### About my CSV addiction
 
