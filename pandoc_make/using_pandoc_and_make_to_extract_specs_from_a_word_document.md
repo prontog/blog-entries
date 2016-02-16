@@ -1,4 +1,4 @@
-[Pandoc](http://pandoc.org/) is a fantastic tool for converting documents supporting most common markup formats. I first learned about it when I started using [R Markdown](http://rmarkdown.rstudio.com/) but didn't directly use it until I read ['From Word to Markdown to InDesign'](http://rhythmus.be/md2indd/) by [Dr Wouter Soudan](http://woutersoudan.be/).
+[Pandoc](http://pandoc.org/) is a fantastic tool for converting documents supporting most common markup formats. I first learned about it when I started using [R Markdown](http://rmarkdown.rstudio.com/) but didn't directly use it until I read ['From Word to Markdown to InDesign'](http://rhythmus.be/md2indd/) by [Dr. Wouter Soudan](http://woutersoudan.be/).
 
 ### Why (create a tool)
 
@@ -17,7 +17,7 @@ As you can see from my post on creating [Wireshark dissectors](https://prontog.w
 
 Perhaps you've already noticed the problem in my workflow.
 
-#### Managing the CSV specs.
+#### Managing the CSV specs
 
 The specs are stored in Word documents, which means that I have to manually extract them into CSV files. Here's my initial workflow:
 
@@ -45,7 +45,7 @@ For each message type:
 
 After many experiments I ended up with the following command to convert a Word document, such as [sop.docx](https://github.com/prontog/blog-entries/raw/master/pandoc_make/sop.docx), to Markdown:
 
-```
+```shell
 #         1      2                           3                       4
 pandoc -smart --filter ./despan.py --to markdown_github sop.docx | iconv -f utf8 -t ascii//TRANSLIT > sop.md
 ```
@@ -58,7 +58,7 @@ Let's break it down:
 
 By examining [sop.md](https://raw.githubusercontent.com/prontog/blog-entries/master/pandoc_make/sop.md) we can see that each message table is preceded by a header with the format: "### MT " where MT is the message type. Hence we can extract each spec table with the following **awk** script:
 
-```
+```js
 /### / {
 	header = $0
 	match(header, /^### ([A-Z]{2}) /, results)
@@ -85,7 +85,7 @@ The script extracts the message type using the regex `/^### ([A-Z]{2}) /` on eac
 In our example, the script will create 7 new files with extension *mdtable*.
 
 Then we need to transform the *mdtable* files to CSV format. The following **sed** script does the job:
-```
+```js
 # Delete ** from the first line.
 s/\*//g
 # Delete lines that start with space. These
@@ -111,7 +111,7 @@ This might seem like overkill but after using Pandoc with 4 different Word docum
 
 As a task runner I used [GNU make](https://www.gnu.org/software/make/manual/html_node/index.html) which is ideal for such cases since it works with file time-stamps and will allow for multiple transformation steps. Here's the final Makefile:
 
-```
+```js
 sop_types := NO OC TR RJ EN BO
 sop_mdtables := $(foreach t, $(sop_types), $(t).mdtable)
 sop_specs := $(foreach t, $(sop_types), $(t).csv)
