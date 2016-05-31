@@ -8,7 +8,7 @@ If you want to filter messages of a protocol with no dissector you can use the f
 
 ### How
 
-A solution is to create a custom dissector your protocol and there are many ways to do so, using the *C API*, the *Lua API*, from a *CORBA IDL* file or using the *Generic Dissector*. The last two had their own format for the protocol specification something I wanted to avoid since I had the specs in **CSV** format. This left the two APIs, both very flexible and would allow me to use the CSV specs. In the end I chose the *Lua* as an excuse to try out the language.
+A solution is to create a custom dissector for your protocol and there are many ways to do so, using the *C API*, the *Lua API*, from a *CORBA IDL* file or using the *Generic Dissector*. The last two had their own format for the protocol specification something I wanted to avoid since I had the specs in **CSV** format. This left the two APIs, both very flexible and would allow me to use the CSV specs. In the end I chose the *Lua* as an excuse to try out the language.
 
 #### Preparation
 
