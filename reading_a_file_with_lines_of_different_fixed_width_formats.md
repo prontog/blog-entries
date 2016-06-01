@@ -27,7 +27,7 @@ The first implementation ([v0.1](https://github.com/prontog/multifwf/releases/ta
 
 > Did you know: That you can see the source of an R function simply by typing its name on the R console?
 
-### How to use it
+### Usage
 
 The function is available on CRAN in the package [multifwf](https://cran.r-project.org/web/packages/multifwf/index.html) and the source code in [Github](https://github.com/prontog/multifwf).
 

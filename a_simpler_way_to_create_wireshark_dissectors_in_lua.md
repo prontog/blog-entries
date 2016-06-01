@@ -70,7 +70,7 @@ Naturally, the implementation of dissectors for three protocols helped me locate
 
 > Did you know: That Wireshark can be used in the command line with the [TShark](https://www.wireshark.org/docs/man-pages/tshark.html) utility?
 
-### How to use it
+### Usage
 
 The source code is available on [Github](https://github.com/prontog/ws_dissector_helper). You can clone the repo or download it as a zip file.
 
