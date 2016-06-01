@@ -156,7 +156,7 @@ Note that:
 4. Rule `sop: $(sop_specs)` is the final rule that simply touches the dummy file *sop*. It also warns about not supported types. This
 5. The rest of the rules are for cleaning up.
 
-### How to try it yourself
+### Trying it yourself
 
 1. Install [Pandoc](http://pandoc.org/installing.html).
 1. Install [pandocfilters](https://pypi.python.org/pypi/pandocfilters)
