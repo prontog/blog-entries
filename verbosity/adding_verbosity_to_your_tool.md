@@ -29,4 +29,6 @@ A bash implementation can include the following:
 
 
 
+There are also tools that might need multiple levels of verbosity. For an example look at the -v option of ssh.
+
 You will find more details concerning transparency in [Chapter 6. Tranparency](http://www.faqs.org/docs/artu/transparencychapter.html) of the *The Art of Unix Programming* by Eric S. Raymond.
