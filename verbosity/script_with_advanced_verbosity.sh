@@ -4,7 +4,7 @@
 usage() {
   cat <<EOF
 Usage: ${0##*/} [OPTION]
-Tool that...can be variably verbose!
+Script that can be get...verbose and more verbose and then even more verbose!
 
 Options:
   -h    display this help text and exit
