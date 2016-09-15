@@ -31,7 +31,8 @@ set_verbosity() {
 	verbosity=1
 }
 
-# Function that echoes all passed arguments to stderr if verbosity is on.
+# Function that echoes all passed arguments to stderr if 
+# verbosity is on.
 trace() {
 	[[ $verbosity -gt 0 ]] && echo $* >&2
 }
@@ -47,9 +48,10 @@ set_verbosity() {
 	verbosity_level=$((verbosity_level + 1))
 }
 
-# Function that echoes all passed arguments to stderr if verbosity is on. If 
-# the first parameter is numeric then the message will only be echoed if the
-# verbosity level is >= to it (the first param).
+# Function that echoes all passed arguments to stderr if 
+# verbosity is on. If the first parameter is numeric then 
+# the message will only be echoed if the verbosity level 
+# is >= to it (the first param).
 trace() {
 	local msg_level=$(($1 + 0))
 	if [[ $msg_level -gt 0 ]]; then
@@ -85,7 +87,7 @@ shift $(( $OPTIND - 1 ))
 ```
 3. Start using the *trace* function:
 ```bash
-trace This message will only be seen on stderr if -v is passed!
+trace This will go to stderr if -v is passed!
 ```
 
 You will find more details concerning transparency in [Chapter 6. Tranparency](http://www.faqs.org/docs/artu/transparencychapter.html) of the *The Art of Unix Programming* by Eric S. Raymond.
