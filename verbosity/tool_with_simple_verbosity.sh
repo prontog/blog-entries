@@ -13,27 +13,38 @@ EOF
   exit 1
 }
 
-#### These functions can be moved to your bashrc file.
+#### These functions can be moved to your bashrc file
+# Function that handles the verbosity option.
 set_verbosity() {
 	verbosity=1
 }
+# Function that echoes all passed arguments to stderr if verbosity is on.
 trace() {
-	if [[ $verbosity > 0 ]]; then
-		echo $*
-	fi
+	[[ $verbosity -gt 0 ]] && echo $* >&2
 }
 ####
 
+tshark_stderr='2>/dev/null'
+# Handle CLI options.
 while getopts "hv" option
 do
 	case $option in
-		v) set_verbosity;;
+		v) set_verbosity
+		   curl_verbosity=-v
+		   tshark_stderr=
+		;;
 		h|\?) usage;;
 	esac
 done
-
 shift $(( $OPTIND - 1 ))
 
-echo Starting...
-trace Verbosity is on
-echo ...finished!
+# A simply trace message
+trace [$(date +%T)] Start doing stuff...
+# Enabling verbosity on another program.
+# case 1: Just pass -v if verbosity is on.
+curl $curl_verbosity https://duckduckgo.com > /dev/null
+# case 2: Make a verbose-by-default program to shut up if 
+# verbosity is off.
+eval tshark -i 5 -c 10 $tshark_stderr > /dev/null
+# Another trace message
+trace [$(date +%T)] Finished!
