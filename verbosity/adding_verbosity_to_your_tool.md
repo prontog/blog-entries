@@ -1,4 +1,4 @@
-Sometimes you will need to know what your tool is currently doing. This is often described as [transparency] (http://www.faqs.org/docs/artu/ch01s06.html#id2878054). 
+Sometimes you will need to know what your tool is currently doing. This is often described as [transparency](http://www.faqs.org/docs/artu/ch01s06.html#id2878054). 
 
 ### Why
 
@@ -22,13 +22,70 @@ Hence the following design:
 
 A bash implementation can include the following:
 
-- A function that sets the environment variable for verbosity. This should be called in the `case` statement that handles the CLI options.
-- A function that returns true if verbosity is enabled.
+- Function **set_verbosity** that sets the environment variable for verbosity. This should be called in the `case` statement that handles the CLI options.
+- Function **trace** that echoes to *stderr* if verbosity is enabled.
+
+```bash
+# Function that handles the verbosity option.
+set_verbosity() {
+	verbosity=1
+}
+
+# Function that echoes all passed arguments to stderr if verbosity is on.
+trace() {
+	[[ $verbosity -gt 0 ]] && echo $* >&2
+}
+```
+
+A complete sample can be found [here](https://github.com/prontog/blog-entries/blob/master/verbosity/script_with_simple_verbosity.sh).
+
+There are also tools that might need multiple levels of verbosity. For an example look at the -v option of ssh.
+
+```bash
+# Function that handles the verbosity option.
+set_verbosity() {
+	verbosity_level=$((verbosity_level + 1))
+}
+
+# Function that echoes all passed arguments to stderr if verbosity is on. If 
+# the first parameter is numeric then the message will only be echoed if the
+# verbosity level is >= to it (the first param).
+trace() {
+	local msg_level=$(($1 + 0))
+	if [[ $msg_level -gt 0 ]]; then
+		shift
+	else
+		msg_level=1
+	fi
+	
+	verbosity_level=$(($verbosity_level + 0))
+	
+	if [[ $verbosity_level -ge $msg_level ]]; then
+		echo $* >&2
+	fi
+}
+```
+
+A complete sample can be found [here](https://github.com/prontog/blog-entries/blob/master/verbosity/script_with_advanced_verbosity.sh).
 
 ### Usage
 
-
-
-There are also tools that might need multiple levels of verbosity. For an example look at the -v option of ssh.
+1. Copy the *set_verbosity* and *trace* function to your BASH script or even better move them to your **bashrc** file.
+2. Handle the -v in the beginning of your script. One way to do this is:
+```bash
+# Handle CLI options.
+while getopts "hv" option
+do
+	case $option in
+		v) set_verbosity
+		;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
+```
+3. Start using the *trace* function:
+```bash
+trace This message will only be seen on stderr if -v is passed!
+```
 
 You will find more details concerning transparency in [Chapter 6. Tranparency](http://www.faqs.org/docs/artu/transparencychapter.html) of the *The Art of Unix Programming* by Eric S. Raymond.
