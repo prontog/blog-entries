@@ -14,14 +14,17 @@ EOF
   exit 1
 }
 
-#### These functions can be moved to your bashrc file
-# Function that handles the verbosity option.
+#### These functions can be moved to your bashrc file:
+# Handle the verbosity option. Use it in the `case` 
+# statement handling the program options.
 set_verbosity() {
 	verbosity_level=$((verbosity_level + 1))
 }
-# Function that echoes all passed arguments to stderr if verbosity is on. If 
-# the first parameter is numeric then the message will only be echoed if the
-# verbosity level is >= to it (the first param).
+
+# Echo all passed arguments to stderr if verbosity is on. 
+# If the first parameter is numeric then the message will 
+# only be echoed if the verbosity level is >= to it (the 
+# message level). Otherwise the message level will be 1.
 trace() {
 	local msg_level=$(($1 + 0))
 	if [[ $msg_level -gt 0 ]]; then
