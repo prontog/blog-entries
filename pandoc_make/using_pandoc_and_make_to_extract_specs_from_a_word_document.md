@@ -118,7 +118,7 @@ sop_specs := $(foreach t, $(sop_types), $(t).csv)
 sop_md := sop.md
 
 sop: $(sop_specs)
-	./sop_update_csv.sh $? && touch $@
+	touch $@
 
 %.csv: %.mdtable
 	./mdtable_to_csv.sh $?
@@ -129,7 +129,7 @@ $(sop_mdtables): $(sop_md)
 
 %.md: %.docx
 	# Convert documentation from docx format to md.
-	pandoc --standalone -smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
+	pandoc -smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
 
 # Clean up rules.	
 
@@ -153,7 +153,7 @@ Note that:
 2. Rule `$(sop_mdtables): $(sop_md)` is for extracting the *mdtable* files from a single *md*. This is done by BASH script [sop_split_to_mdtable.sh](https://github.com/prontog/blog-entries/blob/master/pandoc_make/sop_split_to_mdtable.sh).
 3. Rule `%.csv: %.mdtable` is for converting from *mdtable* to *csv*. This is done by BASH script [mdtable_to_csv.sh
 ](https://github.com/prontog/blog-entries/blob/master/pandoc_make/mdtable_to_csv.sh).
-4. Rule `sop: $(sop_specs)` is the final rule that simply touches the dummy file *sop*. It also warns about not supported types. This
+4. Rule `sop: $(sop_specs)` is the final rule that simply touches the dummy file *sop*.
 5. The rest of the rules are for cleaning up.
 
 ### Trying it yourself
