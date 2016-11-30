@@ -240,10 +240,17 @@ local function parseMessage(buffer, pinfo, tree)
 	end
 	
 	local bytesConsumed, subtree = msgParse(buffer, pinfo, tree, 0)
-	subtree:append_text(', Type: ' .. msgType)	
-	subtree:append_text(', Len: ' .. msgLen)
+	-- Parsing might fail if a field validation fails. For example the
+	-- validation of a field of type Field.FIXED.
+	if bytesConsumed ~= 0 then
+	    subtree:append_text(', Type: ' .. msgType)	
+	    subtree:append_text(', Len: ' .. msgLen)
 
-	pinfo.cols.protocol = sop.name	
+	    pinfo.cols.protocol = sop.name	
+	else
+		protoHelper:trace('Frame: ' .. pinfo.number .. ' Parsing did not complete.')
+	end
+	
 	return bytesConsumed
 end
 ```
