@@ -15,18 +15,18 @@ $(sop_mdtables): $(sop_md)
 
 %.md: %.docx
 	# Convert documentation from docx format to md.
-	pandoc -smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
+	pandoc --smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
 
 # Clean up rules.	
 
 clean: clean_csv clean_mdtable clean_md 
-	rm sop
+	-rm sop
 
 clean_csv:
-	rm $(sop_specs)
+	-rm $(sop_specs)
 	
 clean_mdtable: 
-	rm $(sop_mdtables)
+	-rm $(sop_mdtables)
 
 clean_md: 
-	rm $(sop_md)
+	-rm $(sop_md)
