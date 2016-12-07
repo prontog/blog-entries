@@ -129,7 +129,7 @@ $(sop_mdtables): $(sop_md)
 
 %.md: %.docx
 	# Convert documentation from docx format to md.
-	pandoc -smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
+	pandoc --smart --filter ./despan.py --to markdown_github $? | iconv -f utf8 -t ascii//TRANSLIT > $@
 
 # Clean up rules.	
 
