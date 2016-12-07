@@ -2,7 +2,7 @@
 
 ### Why (create a tool)
 
-As I've mentioned in earlier posts, in the company where I work we maintain several text protocols for inter-process communication. The specification for each protocol is described in a *Word* document from which we create a PDF file every time we make a new release. Each message type is described in a separate section in table format. For an example have a look at the specification for an imaginary protocol named [SOP](https://github.com/prontog/blog-entries/raw/master/pandoc_make/sop.docx). Notice that for each type of message there is a table such as:
+As I've mentioned in earlier posts, in the company where I work we maintain several text protocols for inter-process communication. The specification for each protocol is described in a *Word* document from which we create a PDF file every time we make a new release. Each message type is described in a separate section in table format. For an example have a look at the specification for an imaginary protocol named [SOP](https://github.com/prontog/SOP/raw/master/specs/sop.docx). Notice that for each type of message there is a table such as:
 
 | Field         | Length | Type    | Description                                                 |
 |---------------|--------|---------|-------------------------------------------------------------|
@@ -43,7 +43,7 @@ For each message type:
 
 #### Implementation
 
-After many experiments I ended up with the following command to convert a Word document, such as [sop.docx](https://github.com/prontog/blog-entries/raw/master/pandoc_make/sop.docx), to Markdown:
+After many experiments I ended up with the following command to convert a Word document, such as [sop.docx](https://github.com/prontog/SOP/raw/master/specs/sop.docx), to Markdown:
 
 ```shell
 #         1      2                           3                       4
@@ -56,7 +56,7 @@ Let's break it down:
 3. The *to* option is the most important, specifying the markup of the transformed output. As I mentioned earlier, `markdown_github` supports tables and is a perfect choice.
 4. Convert characters from UTF8 to ASCII with transliteration so a character that can't be represented in the target character set, will be approximated through one or more similar looking characters. You can omit this if you want but in my experience it's the safest choice since some of the tools, I use with the CSV files, prefer ASCII characters.
 
-By examining [sop.md](https://raw.githubusercontent.com/prontog/blog-entries/master/pandoc_make/sop.md) we can see that each message table is preceded by a header with the format: "### MT " where MT is the message type. Hence we can extract each spec table with the following **awk** script:
+By examining [sop.md](https://github.com/prontog/SOP/raw/master/specs/sop.md) we can see that each message table is preceded by a header with the format: "### MT " where MT is the message type. Hence we can extract each spec table with the following **awk** script:
 
 ```js
 /### / {
@@ -150,9 +150,9 @@ clean_md:
 Note that:
 
 1. Rule `%.md: %.docx` is for conversion from *docx* to *md*.
-2. Rule `$(sop_mdtables): $(sop_md)` is for extracting the *mdtable* files from a single *md*. This is done by BASH script [sop_split_to_mdtable.sh](https://github.com/prontog/blog-entries/blob/master/pandoc_make/sop_split_to_mdtable.sh).
+2. Rule `$(sop_mdtables): $(sop_md)` is for extracting the *mdtable* files from a single *md*. This is done by BASH script [sop_split_to_mdtable.sh](https://github.com/prontog/SOP/blob/master/specs/sop_split_to_mdtable.sh).
 3. Rule `%.csv: %.mdtable` is for converting from *mdtable* to *csv*. This is done by BASH script [mdtable_to_csv.sh
-](https://github.com/prontog/blog-entries/blob/master/pandoc_make/mdtable_to_csv.sh).
+](https://github.com/prontog/SOP/blob/master/specs/mdtable_to_csv.sh).
 4. Rule `sop: $(sop_specs)` is the final rule that simply touches the dummy file *sop*.
 5. The rest of the rules are for cleaning up.
 
@@ -160,8 +160,7 @@ Note that:
 
 1. Install [Pandoc](http://pandoc.org/installing.html).
 1. Install [pandocfilters](https://pypi.python.org/pypi/pandocfilters)
-1. Download archive [blog-entries](https://github.com/prontog/blog-entries/archive/master.zip)
-1. Unzip master.zip
-1. cd blog-entries/pandoc_make
+1. git clone https://github.com/prontog/SOP
+1. cd SOP/specs
 1. make clean
 1. make
