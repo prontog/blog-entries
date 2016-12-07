@@ -71,13 +71,14 @@ It is not difficult to see that for each record-type there is separate `RECORD` 
 
 #### Design
 
-A BASH script that accepts the following arguments:
+Hence the following design:
 
-Arg | Description
-----|----------
-HEADER_LEN | The length of the message header. 
-RECORDNAME | 
-
+1. Print the XML part up to, and including, the opening `RECORDS` tag. The RECORDNAME attribute of the main `RECORD` tag should be the name of the protocol
+1. for each *CSV* file:
+    1. add a `RECORD` tag with the RECORDNAME and DESCRIPTION attributes set to the protocol name followed by the *CSV* filename
+    1. for each field:
+        1. add a `FIELD` tag with the NAME and LENGTH attributes taken from the *CSV* and the POSITION set to the offset of the field. For now, the TYPE will be `Char` for all fields.
+1. close the `RECORDS` and main `RECORD` tags.
 
 #### Implementation
 
@@ -86,5 +87,7 @@ The whole script can be found found [here](https://github.com/prontog/SOP/blob/m
 ### Usage
 
 ```bash
-./csv2xmlcopybook.sh 15 "SOP log" *.csv
+./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv
 ```
+
+Now that we have created a Copybook describing our protocol, we can [view](http://record-editor.sourceforge.net/Record05.htm), [filter](http://record-editor.sourceforge.net/Record08.htm) and edit our fixed-width log file:)
