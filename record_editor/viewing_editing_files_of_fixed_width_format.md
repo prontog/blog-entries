@@ -5,8 +5,8 @@ In a previous post I have shown a way to [load a file with lines of fixed-width 
 Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example have a look at some lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file: 
 
 > 09:20:05.034 < NOSLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
-09:20:05.099 > OC000001BLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
-09:20:13.421 < NOBLMT0000666 EVILCORP00001.10AnotherClientId AnotherAccountId
+> 09:20:05.099 > OC000001BLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
+> 09:20:13.421 < NOBLMT0000666 EVILCORP00001.10AnotherClientId AnotherAccountId
 
 And note that the messages in these lines are of a very simple protocol. At the place where I work, we have to deal with much bigger messages (some even longer than 300 characters).  Imagine having to find a certain field somewhere in the message. And under pressure. This is not easy even for experienced employees. What would definitely help is to be able to view the message fields in a clear way. To be able to quickly and safely locate any field in a given line even if you are new to the message protocol. To be able to perform queries and filter out any lines not needed.
 
@@ -151,19 +151,19 @@ To try out *csv2xmlcopybook.sh* on SOP:
 1. Select the **sop.xml** Copybook created in step 4.
 1. Click the *Edit* button.
 
-![Fig 1: The Opened *sopsrv_2016_12_06.log* file](opened_log.jpg)
+![Fig 1: The Opened *sopsrv_2016_12_06.log* file](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/opened_log.jpg)
 
 You might notice that only a few lines are parsed correctly. This is because the SOP log we opened has lines of different formats. One line contains an OC message while another contains a TR message. These messages have different data layouts. This is why there is a **Layouts** combobox over the table. Select the TR layout and the TR messages will be correctly parsed.
 
-![Fig 2: Changing layout ](changing_layouts.jpg)
+![Fig 2: Changing layout ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/changing_layouts.jpg)
 
 By clicking the small button on the left of the row, a detail tab will open. 
 
-![Fig 3: A detailed view of a line ](msg_detail.jpg)
+![Fig 3: A detailed view of a line ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/msg_detail.jpg)
 
 It is also easy to filter lines. Click the *filter* button (with the horizontal arrows) to open the filter window.
 
-![Fig 3: Keeping only OC messages (filter) ](filtering_msgs.jpg)
+![Fig 3: Keeping only OC messages (filter) ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/filtering_msgs.jpg)
 
 Finally you can make changes and save them back to the original file!
 
