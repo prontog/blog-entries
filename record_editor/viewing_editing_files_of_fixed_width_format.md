@@ -1,8 +1,8 @@
-In a previous post I have shown a way to [load a file with lines of fixed-width format](https://prontog.wordpress.com/2016/01/27/reading-a-file-with-lines-of-different-fixed-width-formats/) into *R*. After doing so, it is easy to view the data using *RStudio* (the `View` function) but it is not easy to edit the file if it contains lines of different formats. My `multifwf` package has `read.multi.fwf` function but not a `write.multi.fwf` for writing back to a file. Having said that, it is also not easy for someone unfamiliar with *R* to filter/subset the loaded data.
+In an earlier post, I have shown a way to [load a file with lines of fixed-width format](https://prontog.wordpress.com/2016/01/27/reading-a-file-with-lines-of-different-fixed-width-formats/) into *R*. Using *RStudio* (the `View` function), it is easy to view the data. On the other hand, it is not easy to edit the file when it has lines of different format. My `multifwf` package has a `read.multi.fwf` function but not a `write.multi.fwf` to write changes to a file. On top of that, it is not easy for someone unfamiliar with *R* to filter/subset the loaded data.
 
 ### Why
 
-Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example have a look at some lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file: 
+Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example, look at three lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file: 
 
 ```
 09:20:05.034 < NOSLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
@@ -10,17 +10,17 @@ Reading a fixed-width log file can be very frustrating especially while you are 
 09:20:13.421 < NOBLMT0000666 EVILCORP00001.10AnotherClientId AnotherAccountId
 ```
 
-And note that the messages in these lines are of a very simple protocol. At the place where I work, we have to deal with much bigger messages (some even longer than 300 characters).  Imagine having to find a certain field somewhere in the message. And under pressure. This is not easy even for experienced employees. What would definitely help is to be able to view the message fields in a clear way. To be able to quickly and safely locate any field in a given line even if you are new to the message protocol. To be able to perform queries and filter out any lines not needed.
+Confusing, right? And these lines are of a very simple protocol. At the place where I work, we have much longer messages (even longer than 300 characters).  Imagine having to find a certain field in a 350 character message. And under pressure this can be hard even for experienced employees. It would definitely help to be able to view the message fields in a clear way. To be able to quickly and safely locate any field in a given line even if you are new to the message protocol. To be able to do queries and filter out any lines not needed.
 
-Appart from reading a fixed-width log file, sometimes you might need to edit one. Let's say you want to replay a log file but after changing the value of a field.
+Apart from reading a fixed-width log file, sometimes you might need to edit one. For example, you might want to replay a log file but only after changing some values.
 
 ### How
 
-A solution is using [Record Editor](http://record-editor.sourceforge.net/) or its little brother [reCsvEditor](http://recsveditor.sourceforge.net/). Both of these editors can be used to view/edit fixed-width data files as long as they know how the data is layed out. This data layout can be in many formats and after some experimentation I decided to use the *XML Copybook* format since it allows for multiple data layouts in a single file. This way a single *xml* file can hold the specs for all the message types of the protocol. Other than that, the *XML* examples that come with *Record Editor* were very straighforward, something that I cannot say for the *CSV* examples.
+A solution is to use [Record Editor](http://record-editor.sourceforge.net/) or its little brother [reCsvEditor](http://recsveditor.sourceforge.net/). Both of these editors can be used to view/edit fixed-width data files as long as they know how the data is laid out. This data layout can be in many formats called **Copybooks**. After some experimentation I decided to use the *XML Copybook* since it allows for multiple data layouts in a single file. This way a single *xml* file can hold the specs for all the message types of the protocol. Another reason behind this choice is that the *XML* examples of *Record Editor* were more intuitive.
 
-Having decided on the layout format, I only had to create one for each of the protocols I work with. Of course, this can be tedious and error prone and since I already have the [message specs in CSV format](https://prontog.wordpress.com/2016/02/02/using-pandoc-and-make-to-extract-specs-from-a-word-document/)), I decided to create a tool that converts *CSV* specs to the *XML Copybook* format.
+Having decided on the layout format, I only had to create one for each of the four protocols I work with. Of course, this is tedious and error prone and since I already have the [message specs in CSV format](https://prontog.wordpress.com/2016/02/02/using-pandoc-and-make-to-extract-specs-from-a-word-document/)), I decided to create a tool that converts *CSV* specs to the *XML Copybook* format.
 
-Here's a simplified version of the **"ams PO Download.Xml"** copybook that comes preinstalled with *Record Editor*:
+Here's a simplified version of the **"ams PO Download.Xml"** example that comes with *Record Editor*:
 
 ```xml
 <?xml version="1.0" ?>
@@ -28,7 +28,7 @@ Here's a simplified version of the **"ams PO Download.Xml"** copybook that comes
         RECORDTYPE="GroupOfRecords" LIST="Y" QUOTE="" RecSep="default">
     <RECORDS>
         <RECORD RECORDNAME="ams PO Download: Detail" COPYBOOK="" DELIMITER="&lt;Tab&gt;"
-                DESCRIPTION="PO Download: Detail" FILESTRUCTURE="Default" STYLE="0" ECORDTYPE="RecordLayout"
+                DESCRIPTION="PO Download: Detail" FILESTRUCTURE="Default" STYLE="0" RECORDTYPE="RecordLayout"
             LIST="N" QUOTE="" RecSep="default" TESTFIELD="Record Type" TESTVALUE="D1">
             <FIELDS>
                 <FIELD NAME="Record Type"  POSITION="1" LENGTH="2" TYPE="Char"/>
@@ -69,7 +69,7 @@ Here's a simplified version of the **"ams PO Download.Xml"** copybook that comes
 </RECORD>
 ```
 
-It is not difficult to see that for each record-type there is separate `RECORD` tag. Each RECORD has `FIELDS` tag where all the fields of the record-type are specified. Each field in a separate `FIELD` tag with NAME, POSITION, LENGTH and TYPE attributes. Finally each RECORD tag has a `TESTFIELD` and a `TESTVALUE` attribute. These two attributes will help *Record Editor* to decide which RECORD to use for parsing a line by comparing the value of the field in TESTFIELD with the value of TESTVALUE. When these are the same, we have a match and the FIELDS of the RECORD will be used to parse the line.
+It is easy to see that for each record type there's a separate `RECORD` tag. Each RECORD has a `FIELDS` tag that contains the fields of the record type. For each field there's a separate `FIELD` tag with NAME, POSITION, LENGTH and TYPE attributes. Finally each RECORD tag has a `TESTFIELD` and a `TESTVALUE` attribute. These two attributes will help *Record Editor* to decide which RECORD to use for parsing a line by comparing the value of the field in TESTFIELD with the value of TESTVALUE. When they are equal, the FIELDS of the RECORD will be used to parse the line.
 
 #### Design
 
@@ -79,7 +79,7 @@ Hence the following design:
 1. for each *CSV* file:
     1. add a `RECORD` tag with the RECORDNAME and DESCRIPTION attributes set to the protocol name followed by the *CSV* filename
     1. for each field:
-        1. add a `FIELD` tag with the NAME and LENGTH attributes taken from the *CSV* and the POSITION set to the offset of the field. For now, the TYPE will be `Char` for all fields.
+        1. add a `FIELD` tag with the NAME and LENGTH attributes taken from the *CSV* and the POSITION set to the offset of the field. TYPE will be `Char` for every field.
 1. close the `RECORDS` and main `RECORD` tags.
 
 #### Implementation
@@ -155,11 +155,11 @@ To try out *csv2xmlcopybook.sh* on SOP:
 
 ![Fig 1: The Opened *sopsrv_2016_12_06.log* file](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/opened_log.jpg)
 
-You might notice that only a few lines are parsed correctly. This is because the SOP log we opened has lines of different formats. One line contains an OC message while another contains a TR message. These messages have different data layouts. This is why there is a **Layouts** combobox over the table. Select the TR layout and the TR messages will be correctly parsed.
+Notice that only a couple of lines are displayed correctly. This is because the SOP log we opened has lines of different formats. One line has an OC message while another a TR and for each message type there's a different data layout. You can use the **Layouts** combobox to select the layout of the line you want to parse.
 
 ![Fig 2: Changing layout ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/changing_layouts.jpg)
 
-By clicking the small button on the left of the row, a detail tab will open. 
+Clicking the small button on the left of the row will open a detail tab. 
 
 ![Fig 3: A detailed view of a line ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/msg_detail.jpg)
 
