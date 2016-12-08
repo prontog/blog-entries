@@ -151,7 +151,20 @@ To try out *csv2xmlcopybook.sh* on SOP:
 1. Select the **sop.xml** Copybook created in step 4.
 1. Click the *Edit* button.
 
+![Fig 1: The Opened *sopsrv_2016_12_06.log* file](opened_log.jpg)
 
+You might notice that only a few lines are parsed correctly. This is because the SOP log we opened has lines of different formats. One line contains an OC message while another contains a TR message. These messages have different data layouts. This is why there is a **Layouts** combobox over the table. Select the TR layout and the TR messages will be correctly parsed.
 
+![Fig 2: Changing layout ](changing_layouts.jpg)
 
-Now that we have created a Copybook describing our protocol, we can [view](http://record-editor.sourceforge.net/Record05.htm), [filter](http://record-editor.sourceforge.net/Record08.htm) and edit our fixed-width log file:)
+By clicking the small button on the left of the row, a detail tab will open. 
+
+![Fig 3: A detailed view of a line ](msg_detail.jpg)
+
+It is also easy to filter lines. Click the *filter* button (with the horizontal arrows) to open the filter window.
+
+![Fig 3: Keeping only OC messages (filter) ](filtering_msgs.jpg)
+
+Finally you can make changes and save them back to the original file!
+
+For further info have a look at the locally installed help file. You can access it from *Help* menu.
