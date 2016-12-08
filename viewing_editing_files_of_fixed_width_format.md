@@ -82,12 +82,76 @@ Hence the following design:
 
 #### Implementation
 
-The whole script can be found found [here](https://github.com/prontog/SOP/blob/master/specs/csv2xmlcopybook.sh).
+Here's a BASH implementation for the [SOP](https://github.com/prontog/SOP) protocol.
+
+Step 1:
+
+```bash
+cat <<EOF
+<?xml version="1.0" ?>
+<RECORD RECORDNAME="SOP" COPYBOOK="" DELIMITER="&lt;Tab&gt;" FILESTRUCTURE="Default" STYLE="0" 
+        RECORDTYPE="GroupOfRecords" LIST="Y" QUOTE="" RecSep="default">
+	<RECORDS>
+EOF
+```
+
+Step 2:
+
+```bash
+for s in $*; do
+	SPEC_NAME=${s/.csv/}
+cat <<EOF
+		<RECORD RECORDNAME="SOP: $SPEC_NAME" COPYBOOK="" DELIMITER="&lt;Tab&gt;" 
+		        DESCRIPTION="SOP: $SPEC_NAME" FILESTRUCTURE="Default" STYLE="0" ECORDTYPE="RecordLayout"
+			LIST="N" QUOTE="" RecSep="default" TESTFIELD="MessageType" TESTVALUE="$SPEC_NAME">
+			<FIELDS>
+EOF
+
+	awk '
+	BEGIN {
+		FS = ","
+		f_position = 1
+	}
+	NR != 1 {
+		f_name = $1
+		f_length = $2
+		printf "\t\t\t\t<FIELD NAME=\"%s\"  POSITION=\"%d\" LENGTH=\"%d\" TYPE=\"Char\"/>\n", f_name, f_position, f_length
+		f_position += f_length
+	}
+	' $s
+cat <<EOF
+			</FIELDS>
+		</RECORD>
+EOF
+done
+```
+
+And finally step *3*:
+
+```bash
+cat <<EOF
+	</RECORDS>
+</RECORD>
+EOF
+```
+
+The whole **csv2xmlcopybook.sh** script can be found [here](https://github.com/prontog/SOP/blob/master/specs/csv2xmlcopybook.sh). It has error handling as well as options for the protocol name and header length.
 
 ### Usage
 
-```bash
-./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv
-```
+To try out *csv2xmlcopybook.sh* on SOP:
+
+1. Download [reCsvEditor](https://sourceforge.net/projects/recsveditor/files/reCsvEditor/).
+1. `git clone https://github.com/prontog/SOP`
+1. `cd SOP`
+1. `./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv > sop.xml`
+1. Run *reCsvEditor*
+1. On the left part of the *Open File* window, select the **sopsrv_2016_12_06.log** found in the log directory of the *SOP* repo. Do not click the *Open* button.
+1. On the right part of the *Open File* window, select the *Fixed Width* tab.
+1. Select the **sop.xml** Copybook created in step 4.
+1. Click the *Edit* button.
+
+
+
 
 Now that we have created a Copybook describing our protocol, we can [view](http://record-editor.sourceforge.net/Record05.htm), [filter](http://record-editor.sourceforge.net/Record08.htm) and edit our fixed-width log file:)
