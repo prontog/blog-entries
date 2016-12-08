@@ -4,9 +4,11 @@ In a previous post I have shown a way to [load a file with lines of fixed-width 
 
 Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example have a look at some lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file: 
 
-> 09:20:05.034 < NOSLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
-> 09:20:05.099 > OC000001BLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
-> 09:20:13.421 < NOBLMT0000666 EVILCORP00001.10AnotherClientId AnotherAccountId
+```
+09:20:05.034 < NOSLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
+09:20:05.099 > OC000001BLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
+09:20:13.421 < NOBLMT0000666 EVILCORP00001.10AnotherClientId AnotherAccountId
+```
 
 And note that the messages in these lines are of a very simple protocol. At the place where I work, we have to deal with much bigger messages (some even longer than 300 characters).  Imagine having to find a certain field somewhere in the message. And under pressure. This is not easy even for experienced employees. What would definitely help is to be able to view the message fields in a clear way. To be able to quickly and safely locate any field in a given line even if you are new to the message protocol. To be able to perform queries and filter out any lines not needed.
 
@@ -142,9 +144,9 @@ The whole **csv2xmlcopybook.sh** script can be found [here](https://github.com/p
 To try out *csv2xmlcopybook.sh* on SOP:
 
 1. Download [reCsvEditor](https://sourceforge.net/projects/recsveditor/files/reCsvEditor/).
-1. `git clone https://github.com/prontog/SOP`
-1. `cd SOP`
-1. `./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv > sop.xml`
+1. git clone https://github.com/prontog/SOP
+1. cd SOP
+1. ./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv > sop.xml
 1. Run *reCsvEditor*
 1. On the left part of the *Open File* window, select the **sopsrv_2016_12_06.log** found in the log directory of the *SOP* repo. Do not click the *Open* button.
 1. On the right part of the *Open File* window, select the *Fixed Width* tab.
