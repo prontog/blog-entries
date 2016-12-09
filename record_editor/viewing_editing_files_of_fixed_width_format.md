@@ -1,4 +1,4 @@
-In an earlier post, I have shown a way to [load a file with lines of fixed-width format](https://prontog.wordpress.com/2016/01/27/reading-a-file-with-lines-of-different-fixed-width-formats/) into *R*. Using *RStudio* (the `View` function), it is easy to view the data. On the other hand, it is not easy to edit the file when it has lines of different format. My `multifwf` package has a `read.multi.fwf` function but not a `write.multi.fwf` to write changes to a file. On top of that, it is not easy for someone unfamiliar with *R* to filter/subset the loaded data.
+In an earlier post, I described a way to [load a file with lines of fixed-width format](https://prontog.wordpress.com/2016/01/27/reading-a-file-with-lines-of-different-fixed-width-formats/) into *R*. Using *RStudio* (and the `View` function), it is easy to view the data. On the other hand, it is not easy to edit the file when it has lines of different format. My `multifwf` package has a `read.multi.fwf` function but not a `write.multi.fwf` to write changes back to the file. On top of that, it is not easy for someone unfamiliar with *R* to filter/subset the loaded data.
 
 ### Why
 
@@ -16,7 +16,7 @@ Apart from reading a fixed-width log file, sometimes you might need to edit one.
 
 ### How
 
-A solution is to use [Record Editor](http://record-editor.sourceforge.net/) or its little brother [reCsvEditor](http://recsveditor.sourceforge.net/). Both of these editors can be used to view/edit fixed-width data files as long as they know how the data is laid out. This data layout can be in many formats called **Copybooks**. After some experimentation I decided to use the *XML Copybook* since it allows for multiple data layouts in a single file. This way a single *xml* file can hold the specs for all the message types of the protocol. Another reason behind this choice is that the *XML* examples of *Record Editor* were more intuitive.
+A solution is to use [Record Editor](http://record-editor.sourceforge.net/) or its little brother [reCsvEditor](http://recsveditor.sourceforge.net/). Both of these editors can be used to view/edit fixed-width data files as long as they know how the data is laid out. This data layout can be in many formats called **Copybooks**. After some experimentation I decided to use the *XML Copybook* since it allows for multiple data layouts in a single file. This way a single *XML* file can hold the specs for all the message types of the protocol. Another reason behind this choice is that the *XML* examples of *Record Editor* were the most intuitive.
 
 Having decided on the layout format, I only had to create one for each of the four protocols I work with. Of course, this is tedious and error prone and since I already have the [message specs in CSV format](https://prontog.wordpress.com/2016/02/02/using-pandoc-and-make-to-extract-specs-from-a-word-document/)), I decided to create a tool that converts *CSV* specs to the *XML Copybook* format.
 
@@ -69,7 +69,7 @@ Here's a simplified version of the **"ams PO Download.Xml"** example that comes 
 </RECORD>
 ```
 
-It is easy to see that for each record type there's a separate `RECORD` tag. Each RECORD has a `FIELDS` tag that contains the fields of the record type. For each field there's a separate `FIELD` tag with NAME, POSITION, LENGTH and TYPE attributes. Finally each RECORD tag has a `TESTFIELD` and a `TESTVALUE` attribute. These two attributes will help *Record Editor* to decide which RECORD to use for parsing a line by comparing the value of the field in TESTFIELD with the value of TESTVALUE. When they are equal, the FIELDS of the RECORD will be used to parse the line.
+It is easy to see that for each record type there's a separate `RECORD` tag. Each RECORD has a `FIELDS` tag that contains the fields of the record type. For each field there's a separate `FIELD` tag with NAME, POSITION, LENGTH and TYPE attributes. Finally each RECORD tag has a `TESTFIELD` and a `TESTVALUE` attributes. These two will help *Record Editor* decide which RECORD to use for parsing a line by comparing the value of the field in TESTFIELD with the value of TESTVALUE. When they are equal, the FIELDS of the RECORD will be used to parse the line.
 
 #### Design
 
@@ -104,7 +104,7 @@ for s in $*; do
 	SPEC_NAME=${s/.csv/}
 cat <<EOF
 		<RECORD RECORDNAME="SOP: $SPEC_NAME" COPYBOOK="" DELIMITER="&lt;Tab&gt;" 
-		        DESCRIPTION="SOP: $SPEC_NAME" FILESTRUCTURE="Default" STYLE="0" ECORDTYPE="RecordLayout"
+		        DESCRIPTION="SOP: $SPEC_NAME" FILESTRUCTURE="Default" STYLE="0" RECORDTYPE="RecordLayout"
 			LIST="N" QUOTE="" RecSep="default" TESTFIELD="MessageType" TESTVALUE="$SPEC_NAME">
 			<FIELDS>
 EOF
@@ -137,7 +137,7 @@ cat <<EOF
 EOF
 ```
 
-The whole **csv2xmlcopybook.sh** script can be found [here](https://github.com/prontog/SOP/blob/master/specs/csv2xmlcopybook.sh). It has error handling as well as options for the protocol name and header length.
+The complete **csv2xmlcopybook.sh** script can be found [here](https://github.com/prontog/SOP/blob/master/specs/csv2xmlcopybook.sh). It includes options for the protocol name and header length.
 
 ### Usage
 
@@ -148,10 +148,10 @@ To try out *csv2xmlcopybook.sh* on SOP:
 1. cd SOP
 1. ./csv2xmlcopybook.sh -H 15 -p "SOP log" *.csv > sop.xml
 1. Run *reCsvEditor*
-1. On the left part of the *Open File* window, select the **sopsrv_2016_12_06.log** found in the log directory of the *SOP* repo. Do not click the *Open* button.
+1. On the left part of the *Open File* window, select the **sopsrv_2016_12_06.log** found in the *log* directory of the *SOP* repo. Do not click the *Open* button yet.
 1. On the right part of the *Open File* window, select the *Fixed Width* tab.
 1. Select the **sop.xml** Copybook created in step 4.
-1. Click the *Edit* button.
+1. Click the *Open* button.
 
 ![Fig 1: The Opened *sopsrv_2016_12_06.log* file](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/opened_log.jpg)
 
@@ -159,7 +159,7 @@ Notice that only a couple of lines are displayed correctly. This is because the 
 
 ![Fig 2: Changing layout ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/changing_layouts.jpg)
 
-Clicking the small button on the left of the row will open a detail tab. 
+Clicking the small button on the left of the row will open a *detail* tab. 
 
 ![Fig 3: A detailed view of a line ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/msg_detail.jpg)
 
