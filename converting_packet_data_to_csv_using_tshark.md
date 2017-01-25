@@ -175,7 +175,7 @@ BEGIN {
 
 As you can see string `msgTypesToPrint` (line 6) includes the names of the message types containing every exported field. The rest of the messages will be filtered out (lines 18-24) and new array `filteredMsgTypes` will contain the messages to output. If the remaining message types are not equal to the number of *clientIds* (not present in every message), then skip the frame entirely and print a warning in *stderr* (lines 33-39). Finally, array `filteredMsgTypes` is deleted before moving to the next line. This is necessary since it's a global variable.
 
-That's about it. You can examine the whole script *cap2sop.sh*  [here](https://github.com/prontog/ws_dissector_helper/blob/master/examples/cap2sop.sh).
+That's about it. You can examine the whole script **cap2sop.sh** [here](https://github.com/prontog/ws_dissector_helper/blob/master/examples/cap2sop.sh).
 
 ### Usage
 
