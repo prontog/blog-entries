@@ -35,7 +35,7 @@ The first dissector I created was for a *fixed width* text protocol with fields 
 
 Then I worked on another text protocol which included repeating groups. These are groups of fields that are repeated N times where N is specified from another field in the message.
 
-For example, image a message describing a contact. The contact can have many phone numbers, each described by a name and number:
+For example, imagine a message describing a contact. The contact can have many phone numbers, each described by a name and number:
 
 Field | Length | Type | Description
 -----|---------|------|------
