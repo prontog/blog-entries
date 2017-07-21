@@ -21,7 +21,7 @@ No matter which approach you choose, you can still handle multiple protocol vers
 As an example implementation we can look at the [init.lua](https://github.com/prontog/SOP/blob/master/network/init.lua) and [sop.lua](https://github.com/prontog/SOP/blob/master/network/sop.lua), the the Wireshark Dissector for the [SOP](https://github.com/prontog/SOP) protocol.
 
 As you can see in the call to `loadSpecs`, the second paremeter is **SOP_SPECS_PATH** which is declared in *init.lua* and set with the value of the environment variable with the same name.
-```lua
+```js
 -- From init.lua
 SOP_SPECS_PATH = os.getenv("SOP_SPECS_PATH")
 -- From sop.lua
@@ -37,7 +37,7 @@ $ SOP_SPECS_PATH=/path/to/version tshark -Y sop -r file_containing_sop_msgs.cap
 
 ### Usage
 
-The source code  can be found on [Github](https://github.com/prontog/SOP/network).
+The source code can be found on [Github](https://github.com/prontog/SOP/tree/master/network).
 
 The easiest way to test it is using [Vagrant](https://github.com/prontog/SOP#trying-it-out). After starting up the Vagrant box and connecting to it (ssh):
 
