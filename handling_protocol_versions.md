@@ -12,21 +12,47 @@ You can either make the tool version-aware or keep two different versions of the
 
 No matter which approach you choose, you can still handle multiple protocol versions by:
 
-1. **isolating** each version (protocol specs and/or scripts) in a directory and
+1. **isolating** each version (protocol specs and/or scripts) in a directory
 2. in your tool, use an **environment variable** pointing to one of these directories
 3. finally set the env var depending on the protocol version you want to work with
 
 #### Implementation
 
+As an example implementation we can look at the [init.lua](https://github.com/prontog/SOP/blob/master/network/init.lua) and [sop.lua](https://github.com/prontog/SOP/blob/master/network/sop.lua), the the Wireshark Dissector for the [SOP](https://github.com/prontog/SOP) protocol.
 
-> Did you know: MENTION SOMETHING COOL I FOUND WHILE WORKING ON THE TOOL
+As you can see in the call to `loadSpecs`, the second paremeter is **SOP_SPECS_PATH** which is declared in *init.lua* and set with the value of the environment variable with the same name.
+```lua
+-- From init.lua
+SOP_SPECS_PATH = os.getenv("SOP_SPECS_PATH")
+-- From sop.lua
+local msg_specs, msg_parsers = helper:loadSpecs(msg_types, SOP_SPECS_PATH,
+												columns, header:len(),
+												',', header, trailer)
+```
+
+Then we can simply set *SOP_SPECS_PATH* to the directory with the specs of the specific version of *SOP*.
+```bash
+$ SOP_SPECS_PATH=/path/to/version tshark -Y sop -r file_containing_sop_msgs.cap
+```
 
 ### Usage
 
-The source code  can be found on [Github](https://github.com/prontog/UPDATE THIS PART).
+The source code  can be found on [Github](https://github.com/prontog/SOP/network).
 
-Here's an example on how to use **TOOL NAME HERE**:
+The easiest way to test it is using [Vagrant](https://github.com/prontog/SOP#trying-it-out). After starting up the Vagrant box and connecting to it (ssh):
 
-```
-EXAMPLE GOES HERE
+```bash
+# Trying out an older capture file with the latest SOP version:
+cap2sop.sh /vagrant/logs/sop_2016-01-21.pcapng | wc -l
+# output: 9
+# Then with the correct SOP version:
+SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 cap2sop.sh /vagrant/logs/sop_2016-01-21.pcapng | wc -l
+# output: 19
+
+# To test a new capture file that supports the latest SOP version:
+cap2sop.sh /vagrant/logs/sop_2017-07-17.pcapng | wc -l
+# output: 13
+# Then with the older SOP version:
+SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 cap2sop.sh cap2sop.sh /vagrant/logs/sop_2017-07-17.pcapng | wc -l
+# output: 9
 ```
