@@ -43,16 +43,16 @@ The easiest way to test it is using [Vagrant](https://github.com/prontog/SOP#try
 
 ```bash
 # Trying out an older capture file with the latest SOP version:
-cap2sop.sh /vagrant/logs/sop_2016-01-21.pcapng | wc -l
-# output: 9
+tshark -Y sop -r /vagrant/logs/sop_2016-01-21.pcapng | wc -l
+# output: 8
 # Then with the correct SOP version:
-SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 cap2sop.sh /vagrant/logs/sop_2016-01-21.pcapng | wc -l
-# output: 19
+SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 tshark -Y sop -r /vagrant/logs/sop_2016-01-21.pcapng | wc -l
+# output: 9
 
 # To test a new capture file that supports the latest SOP version:
-cap2sop.sh /vagrant/logs/sop_2017-07-17.pcapng | wc -l
-# output: 13
-# Then with the older SOP version:
-SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 cap2sop.sh cap2sop.sh /vagrant/logs/sop_2017-07-17.pcapng | wc -l
+tshark -Y sop -r /vagrant/logs/sop_2017-07-17.pcapng | wc -l
 # output: 9
+# Then with the older SOP version:
+SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 tshark -Y sop -r /vagrant/logs/sop_2017-07-17.pcapng | wc -l
+# output: 8
 ```
