@@ -20,7 +20,7 @@ No matter which approach you choose, you can still handle multiple protocol vers
 
 As an example implementation we can look at the [init.lua](https://github.com/prontog/SOP/blob/master/network/init.lua) and [sop.lua](https://github.com/prontog/SOP/blob/master/network/sop.lua), the the Wireshark Dissector for the [SOP](https://github.com/prontog/SOP) protocol.
 
-As you can see in the call to `loadSpecs`, the second paremeter is **SOP_SPECS_PATH** which is declared in *init.lua* and set with the value of the environment variable with the same name.
+As you can see in the call to `loadSpecs`, the second parameter is **SOP_SPECS_PATH** which is declared in *init.lua* and set with the value of the environment variable with the same name.
 ```js
 -- From init.lua
 SOP_SPECS_PATH = os.getenv("SOP_SPECS_PATH")
@@ -56,3 +56,60 @@ tshark -Y sop -r /vagrant/logs/sop_2017-07-17.pcapng | wc -l
 SOP_SPECS_PATH=$SOP_SPECS_PATH/1.0 tshark -Y sop -r /vagrant/logs/sop_2017-07-17.pcapng | wc -l
 # output: 8
 ```
+
+#### Taking it one step further
+
+Of course we can take it one step further and automate the setup of this environment variable when a date is found in the filename. The script can then find the active version at this date and set SOP_SPECS_PATH appropriately.
+
+So, in the case of *SOP* protocol, we can:
+
+1. add [versions.csv](https://github.com/prontog/SOP/blob/master/specs/versions.csv) with all *SOP* versions:
+
+	|  version | release_date | info                                    |
+	|----------|--------------|-----------------------------------------|
+	|  1.0     | 2016-01-01   | First release of SOP.                   |
+	|  2.0     | 2017-07-01   | Second release with larger RJ.text!!!!  |
+
+2. create script [sop_specs_path.sh](https://github.com/prontog/SOP/blob/master/specs/sop_specs_path.sh), that given a filename containing a date (YYYY-MM-DD/YYYY_MM_DD), it looks in *versions.csv* for the *SOP* version released before that date.
+3. update [cap2sop.sh](https://github.com/prontog/SOP/blob/master/network/cap2sop.sh), so that it uses *sop_specs_path.sh* before calling *tshark*.
+
+Then we can even call *cap2sop.sh* with files of different
+
+```bash
+cap2sop.sh /vagrant/logs/sop_20*.pcapng
+```
+
+Here's the output. Notice that all *RJ* messages were properly dissected although *sop_2016-01-21.pcapng* has messages of SOP v**1.0** and *sop_2017-07-17.pcapng* has messages of v**2.0**.
+
+|  frame | dateTime        | msgType | clientId         | ethSrc            | ethDst            | ipSrc          | ipDst        | capFile                |
+|--------|-----------------|---------|------------------|-------------------|-------------------|----------------|--------------|------------------------|
+|  3     | 14:15:16.608027 | NO      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  3     | 14:15:16.608027 | OC      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  3     | 14:15:16.608027 | NO      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  3     | 14:15:16.608027 | **RJ**      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | **sop_2016-01-21.pcapng**  |
+|  3     | 14:15:16.608027 | NO      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  3     | 14:15:16.608027 | OC      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  7     | 14:15:18.617432 | NO      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  9     | 14:15:19.622369 | OC      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  11    | 14:15:20.627967 | **RJ**      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | **sop_2016-01-21.pcapng**  |
+|  17    | 14:15:31.103467 | NO      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | OC      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | NO      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | **RJ**      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | **sop_2016-01-21.pcapng**  |
+|  17    | 14:15:31.103467 | NO      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | OC      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | NO      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | OC      | SomeClientId     | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | sop_2016-01-21.pcapng  |
+|  17    | 14:15:31.103467 | **RJ**      | AnotherClientId  | 00:0c:29:c8:76:1d | 00:50:56:c0:00:00 | 192.168.58.128 | 192.168.58.1 | **sop_2016-01-21.pcapng**  |
+|  3     | 09:17:09.240402 | NO      | SomeClientId     | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  4     | 09:17:10.246698 | OC      | SomeClientId     | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  5     | 09:17:11.248273 | NO      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  6     | 09:17:12.249938 | **RJ**      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | **sop_2017-07-17.pcapng**  |
+|  7     | 09:17:13.252035 | NO      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  8     | 09:17:14.254140 | OC      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  11    | 09:17:17.260084 | NO      | SomeClientId     | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  11    | 09:17:17.260084 | OC      | SomeClientId     | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  11    | 09:17:17.260084 | NO      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  11    | 09:17:17.260084 | **RJ**      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | **sop_2017-07-17.pcapng**  |
+|  11    | 09:17:17.260084 | NO      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
+|  11    | 09:17:17.260084 | OC      | AnotherClientId  | 08:00:27:6f:12:9e | 0a:00:27:00:00:0e | 192.168.56.11  | 192.168.56.1 | sop_2017-07-17.pcapng  |
