@@ -2,7 +2,7 @@ In an earlier post, I described a way to [load a file with lines of fixed-width 
 
 ### Why
 
-Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example, look at three lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file: 
+Reading a fixed-width log file can be very frustrating especially while you are troubleshooting. For example, look at three lines from a [SOP](https://github.com/prontog/SOP/blob/master/logs/sopsrv_2016_12_06.log) log file:
 
 ```
 09:20:05.034 < NOSLMT0000666    EVILCORP00010.77SomeClientId    SomeAccountId   
@@ -91,7 +91,7 @@ Step 1:
 ```bash
 cat <<EOF
 <?xml version="1.0" ?>
-<RECORD RECORDNAME="SOP" COPYBOOK="" DELIMITER="&lt;Tab&gt;" FILESTRUCTURE="Default" STYLE="0" 
+<RECORD RECORDNAME="SOP" COPYBOOK="" DELIMITER="&lt;Tab&gt;" FILESTRUCTURE="Default" STYLE="0"
         RECORDTYPE="GroupOfRecords" LIST="Y" QUOTE="" RecSep="default">
 	<RECORDS>
 EOF
@@ -103,7 +103,7 @@ Step 2:
 for s in $*; do
 	SPEC_NAME=${s/.csv/}
 cat <<EOF
-		<RECORD RECORDNAME="SOP: $SPEC_NAME" COPYBOOK="" DELIMITER="&lt;Tab&gt;" 
+		<RECORD RECORDNAME="SOP: $SPEC_NAME" COPYBOOK="" DELIMITER="&lt;Tab&gt;"
 		        DESCRIPTION="SOP: $SPEC_NAME" FILESTRUCTURE="Default" STYLE="0" RECORDTYPE="RecordLayout"
 			LIST="N" QUOTE="" RecSep="default" TESTFIELD="MessageType" TESTVALUE="$SPEC_NAME">
 			<FIELDS>
@@ -157,9 +157,15 @@ To try out *csv2xmlcopybook.sh* on SOP:
 
 Notice that only a couple of lines are displayed correctly. This is because the SOP log we opened has lines of different formats. One line has an OC message while another a TR and for each message type there's a different data layout. You can use the **Layouts** combobox to select the layout of the line you want to parse.
 
+Select *Prefered* for automatic layout selection. To set this as the default behaviour: *Edit* menu -> *Edit Options* -> *Behaviour* tab -> **Default to prefered layout**.
+
+Another great feature is the *Child Record* which can be enabled from the *Window* menu.
+
+Thanks to Bruce Martin for these two great tips!
+
 ![Fig 2: Changing layout ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/changing_layouts.jpg)
 
-Clicking the small button on the left of the row will open a *detail* tab. 
+Clicking the small button on the left of the row will open a *detail* tab.
 
 ![Fig 3: A detailed view of a line ](https://raw.githubusercontent.com/prontog/blog-entries/master/record_editor/msg_detail.jpg)
 
