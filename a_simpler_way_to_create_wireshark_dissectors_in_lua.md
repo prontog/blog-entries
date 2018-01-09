@@ -4,7 +4,7 @@
 
 As I mentioned before, Wireshark has filtering capabilities, which you can use to search for distinctive parts of your message. For example, you can use `tcp.port == 9001` to get the communication on port 9001 (source or target). This type of filtering works because a *TCP* dissector is installed with Wireshark. In the *Protocols* section of the *Preferences* dialog you will find all the available dissectors.
 
-If you want to filter messages of a protocol with no dissector you can use the frame object. For example to look for messages containing the string "EVIL" you can use `frame contains "EVIL"`. To be exact, this filter will return all frames containing the string. Not the actual messages. If for example each frame has 10 messages, then good luck finding them. As you can imagine, this can become tiresome and sometimes, give you headaches. 
+If you want to filter messages of a protocol with no dissector you can use the frame object. For example to look for messages containing the string "EVIL" you can use `frame contains "EVIL"`. To be exact, this filter will return all frames containing the string. Not the actual messages. If for example each frame has 10 messages, then good luck finding them. As you can imagine, this can become tiresome and sometimes, give you headaches.
 
 ### How
 
@@ -25,7 +25,7 @@ As I mentioned earlier, in the company where I work, we maintain many text proto
 Hence the following design:
 
 1. For each message type, read its CSV spec and create **field objects** and a message **parser**
-2. Create a **dissector** function that locates the message type, reassembles it if needed, and calls the appropriate parser. 
+2. Create a **dissector** function that locates the message type, reassembles it if needed, and calls the appropriate parser.
 
 Before moving to the implementation, I decided that the first part could be encapsulated in a common module to be used by all dissectors.
 
@@ -62,7 +62,7 @@ First name | 20 | STRING | First name of the contact
 
 Here we see that:
 
-1. The 'Last name' field is of type **VARLEN**. 
+1. The 'Last name' field is of type **VARLEN**.
 2. The *Length* of the 'Last name' field is not a number, but it references another field in the message.
 3. Other fields can follow a 'VARLEN' field.
 
@@ -113,7 +113,7 @@ helper:setDefaultPreference(defaultSettings)
 
 Define the protocol's message types. Each message type has a *name* and *file* property. The file property is the filename of the CSV file that contains the specification of the fields for the message type. Note that the CSV files should be located in *SOP_SPECS_PATH*.
 ```js
-local msg_types = { { name = 'NO', file = 'NO.csv' }, 
+local msg_types = { { name = 'NO', file = 'NO.csv' },
 				    { name = 'OC', file = 'OC.csv' },
 					{ name = 'TR', file = 'TR.csv' },
 					{ name = 'RJ', file = 'RJ.csv' } }
@@ -123,7 +123,7 @@ Define fields for the header and trailer. If your CSV files contain all the mess
 ```js
 local SopFields = {
 	SOH = wsdh.Field.FIXED(1,'sop.header.SOH', 'SOH', '\x01','Start of Header'),
-	LEN = wsdh.Field.NUMERIC(3,'sop.header.LEN', 'LEN','Length of the payload (i.e. no header/trailer)'),	
+	LEN = wsdh.Field.NUMERIC(3,'sop.header.LEN', 'LEN','Length of the payload (i.e. no header/trailer)'),
 	ETX = wsdh.Field.FIXED(1, 'sop.trailer.ETX', 'ETX', '\x03','End of Message')
 }
 ```
@@ -137,7 +137,7 @@ local header = wsdh.Field.COMPOSITE{
 }
 
 local trailer = wsdh.Field.COMPOSITE{
-	title = 'Trailer',	
+	title = 'Trailer',
 	SopFields.ETX
 }
 ```
@@ -148,8 +148,8 @@ Now let's load the specs using the `loadSpecs` function of the `helper` object. 
 1. dir			the directory were the CSV files are located
 1. columns is a table with the mapping of columns:
 
-	- name is the name of the field name column. 
-	- length is the name of the field legth column. 
+	- name is the name of the field name column.
+	- length is the name of the field legth column.
 	- type is the name of the field type column. Optional. Defaults to STRING.
 	- desc is the name of the field description column. Optional.
 1. offset		the starting value for the offset column. Optional. Defaults to 0.
@@ -161,8 +161,8 @@ The function returns two tables. One containing the message specs and another co
 
 ```js
 -- Column mapping. As described above.
-local columns = { name = 'Field', 
-				  length = 'Length', 
+local columns = { name = 'Field',
+				  length = 'Length',
 				  type = 'Type',
 				  desc = 'Description' }
 
@@ -178,17 +178,20 @@ local msg_specs, msg_parsers = helper:loadSpecs(msg_types,
 Now let's create a few helper functions that will simplify the main parse function.
 
 ```js
--- Returns the length of the message from the end of header up to the start 
+-- Returns the length of the message from the end of header up to the start
 -- of trailer.
 local function getMsgDataLen(msgBuffer)
-	return helper:getHeaderValue(msgBuffer, SopFields.LEN)
+	return tonumber(helper:getHeaderValue(msgBuffer, SopFields.LEN))
 end
 
 -- Returns the length of whole the message. Includes header and trailer.
 local function getMsgLen(msgBuffer)
-	return header:len() + 
-		   getMsgDataLen(msgBuffer) + 
-		   trailer:len()
+	local msgdataLen = getMsgDataLen(msgBuffer)
+	if msgdataLen == nil then
+		return nil
+	end
+
+	return header:len() + msgdataLen + trailer:len()
 end
 ```
 
@@ -202,12 +205,12 @@ local function parseMessage(buffer, pinfo, tree)
 	-- Messages start with SOH.
 
 	if SopFields.SOH:value(buffer) ~= SopFields.SOH.fixedValue then
-		helper:trace('Frame: ' .. pinfo.number .. ' No SOH.')
+		helper:warn('No SOH.')
 		return 0
-	end	
+	end
 
-	-- Return missing message length in the case when the header is split 
-	-- between packets.	
+	-- Return missing message length in the case when the header is split
+	-- between packets.
 	if buffer:len() <= minBufferLen then
 		return -DESEGMENT_ONE_MORE_SEGMENT
 	end
@@ -216,51 +219,47 @@ local function parseMessage(buffer, pinfo, tree)
 	local msgType = buffer(header:len(), msgTypeLen):string()
 	local msgSpec = msg_specs[msgType]
 	if not msgSpec then
-		helper:trace('Frame: ' .. pinfo.number .. 
-					 ' Unknown message type: ' .. msgType)
+		helper:warn('Unknown message type: ' .. msgType)
 		return 0
 	end
 
-	-- Return missing message length in the case when the data is split 
+	-- Return missing message length in the case when the data is split
 	-- between packets.
 	local msgLen = getMsgLen(buffer)
 	local msgDataLen = getMsgDataLen(buffer)
 	if buffer:len() < msgLen then
-		helper:trace('Frame: ' .. pinfo.number .. ' buffer:len < msgLen')
+		helper:info('buffer:len < msgLen [' .. buffer:len() .. ' < ' .. msgLen .. ']')
 		return -DESEGMENT_ONE_MORE_SEGMENT
 	end
 
 	local msgParse = msg_parsers[msgType]
-	-- If no parser is found for this type of message, reject the whole 
+	-- If no parser is found for this type of message, reject the whole
 	-- packet.
 	if not msgParse then
-		helper:trace('Frame: ' .. pinfo.number .. 
-					 ' Not supported message type: ' .. msgType)
+		helper:warn('Not supported message type: ' .. msgType)
 		return 0
 	end
-	
+
 	local bytesConsumed, subtree = msgParse(buffer, pinfo, tree, 0)
 	-- Parsing might fail if a field validation fails. For example the
 	-- validation of a field of type Field.FIXED.
 	if bytesConsumed ~= 0 then
-	    subtree:append_text(', Type: ' .. msgType)	
+	    subtree:append_text(', Type: ' .. msgType)
 	    subtree:append_text(', Len: ' .. msgLen)
 
-	    pinfo.cols.protocol = sop.name	
-	else
-		protoHelper:trace('Frame: ' .. pinfo.number .. ' Parsing did not complete.')
+	    pinfo.cols.protocol = sop.name
 	end
-	
+
 	return bytesConsumed
 end
 ```
 
-Now that the parse function for the SOP protocol is ready, we need to create the dissector function using the `getDissector` helper function which returns a dissector function containing the basic while loop that pretty much all dissectors need to have. 
+Now that the parse function for the SOP protocol is ready, we need to create the dissector function using the `getDissector` helper function which returns a dissector function containing the basic while loop that pretty much all dissectors need to have.
 ```js
 sop.dissector = helper:getDissector(parseMessage)
 ```
 
-Finally enable the dissector. `enableDissector` registers the ports to the TCP dissector table. 
+Finally enable the dissector. `enableDissector` registers the ports to the TCP dissector table.
 ```js
 helper:enableDissector()
 ```
@@ -271,7 +270,7 @@ What I usually do to test my dissector is to create a text file with many messag
 
 1. Start a server with `nc -l 9001`
 2. Start *tshark* with a display filter with the protocol name: `tshark -Y 'sop'`. Note that sometimes this approach might hide some Lua errors. Then you can repeat the test using `Wireshark` instead of `tshark`.
-3. Connect with a client and send one or more messages from a file: `cat messages.txt | nc SERVER_IP 9001`
+3. Connect with a client and send one or more messages from a file: `cat conversation.txt | while read line; do echo -n "$line"; sleep 1; done nc 9001`.
 4. If lines appear in the filtered *tshark* output then the test was successful.
 
 If you finish testing, you can save the captured frame to a file for future tests.
