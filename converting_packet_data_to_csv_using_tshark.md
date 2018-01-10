@@ -1,7 +1,7 @@
 If you have created your own [Wireshark](https://www.wireshark.org/) dissector, you might want to further analyze your network captures. Let's say to measure performance and although you could do this using Wireshark (MATE, listeners, statistics) it can be complicated and not flexible compared to a statistics-friendly environment (R, Octave, PSPP, iPython etc.). Furthermore if you use another tool to analyze your application's log files, it's easier to extract packet info to a text format and use your own toolset. In my case the most suitable text format is *CSV* since I can easily load it in *R* and use the same functions I use to analyze my application's logs.
 
 ### Why (create a tool)
-[TShark](https://www.wireshark.org/docs/man-pages/tshark.html) has options (-T, -E and -e) for printing the packet fields in a delimited text format but there's a catch. If your application batches messages then TShark will export all messages from a packet to a single line. But what you will most likely need is one message per line. 
+[TShark](https://www.wireshark.org/docs/man-pages/tshark.html) has options (-T, -E and -e) for printing the packet fields in a delimited text format but there's a catch. If your application batches messages then TShark will export all messages from a packet to a single line. But what you will most likely need is one message per line.
 
 Let's see an example using a [capture file](https://github.com/prontog/ws_dissector_helper/raw/master/examples/sop.pcapng) containing packets of the [SOP](https://github.com/prontog/ws_dissector_helper/tree/master/examples/README.md) protocol:
 
@@ -77,18 +77,18 @@ Part 2.1 is also straight forward. Note that if an argument is not a file, a war
 until [[ -z $1 ]]
 do
 	if [[ ! -f $1 ]]; then
-		echo $1 is not a file > /dev/stderr
+		echo $1 is not a file >&2
 	fi
-	
+
 	CAP_FILE=$1
 
 	set -o errexit
-	
+
 	tshark -Y sop -Tfields -e frame.number -e _ws.col.Time \
         -e sop.msgtype -e sop.clientid -E separator=','    \
         -E aggregator=';' -E header=y -r $CAP_FILE | awk '
         # Part 2.2. See below for a detailed description.'
-	
+
     shift
 done
 ```
@@ -108,8 +108,8 @@ BEGIN {
 	# Message types are split into an array using the
 	# aggregator delimeter from part 2.1.
 	split($3, msgTypes, ";")
-	
-	# Print a separate line for each message type in 
+
+	# Print a separate line for each message type in
 	# the packet (frame).
 	for(i in msgTypes) {
 		print frame, dateTime, msgTypes[i]
@@ -122,7 +122,7 @@ Nothing special here, the *msgType* column is split using the aggregator delimit
 Let's move to the more complicated case where the exported fields are **not** present in every message:
 
 ```bash
-BEGIN { 
+BEGIN {
 	FS = ","
 	OFS = ","
 	# These are the msg types that contain the clientId
@@ -136,8 +136,8 @@ BEGIN {
 	# Message types and clientIds are split into arrays.
 	split($3, msgTypes, ";")
 	split($4, clientIds, ";")
-	
-	# Copy the messages types that are included in 
+
+	# Copy the messages types that are included in
 	# msgTypesToPrint to array filteredMsgTypes.
 	fi = 0
 	for(i in msgTypes) {
@@ -146,28 +146,28 @@ BEGIN {
 			filteredMsgTypes[fi] = msgTypes[i]			
 		}
 	}
-	
+
 	# Skip line if there was no messages to print.
 	if (fi == 0) {
 		next
 	}
-	
-	# filteredMsgTypes should have the same length 
+
+	# filteredMsgTypes should have the same length
 	# with clientIds.
 	if (length(filteredMsgTypes) != length(clientIds)) {
-		printf("Skipping frame %d because of missing fields (%d, %d).", 
-				frame, 
-				length(filteredMsgTypes), 
+		printf("Skipping frame %d because of missing fields (%d, %d).",
+				frame,
+				length(filteredMsgTypes),
 				length(clientIds)) > "/dev/stderr"
 		next
 	}
-	
+
 	for(i in filteredMsgTypes) {
-		print frame, dateTime, 
+		print frame, dateTime,
 		      filteredMsgTypes[i], clientIds[i]
 	}
-	
-	# Clean up array filteredMsgTypes before moving to 
+
+	# Clean up array filteredMsgTypes before moving to
 	# the next line.
 	delete filteredMsgTypes
 }
