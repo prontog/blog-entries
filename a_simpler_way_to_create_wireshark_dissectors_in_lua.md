@@ -270,10 +270,17 @@ What I usually do to test my dissector is to create a text file with many messag
 
 1. Start a server with `nc -l 9001`
 2. Start *tshark* with a display filter with the protocol name: `tshark -Y 'sop'`. Note that sometimes this approach might hide some Lua errors. Then you can repeat the test using `Wireshark` instead of `tshark`.
-3. Connect with a client and send one or more messages from a file: `cat conversation.txt | while read line; do echo -n "$line"; sleep 1; done nc 9001`.
+3. Connect with a client and send one or more messages from a file:
+
+	```bash
+	cat messages.txt | while read line; do
+		echo -n "$line";
+		sleep 1;
+	done | nc 9001
+	```
 4. If lines appear in the filtered *tshark* output then the test was successful.
 
-If you finish testing, you can save the captured frame to a file for future tests.
+If you finish testing, you can save the captured frames to a file (using the -w option of *tshark*) for future tests.
 
 ### Installing your dissector
 
