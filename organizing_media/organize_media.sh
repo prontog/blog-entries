@@ -21,7 +21,7 @@ if [[ ! -d $MEDIA_DIR ]]; then
 	error MEDIA_DIR is not a directory [$MEDIA_DIR]
 fi
 
-find $MEDIA_DIR -type f | while read f; do
+find "$MEDIA_DIR" -type f | while read f; do
 	printf "%s;" "$f"
     mediainfo $f | sed -rn '/^General/,/^$/{s/Tagged date[[:space:]]*:.*([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1;\2/p}'
 	printf "\n"

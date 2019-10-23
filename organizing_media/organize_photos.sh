@@ -21,7 +21,7 @@ if [[ ! -d $PHOTO_DIR ]]; then
 	error PHOTO_DIR is not a directory [$PHOTO_DIR]
 fi
 
-find $PHOTO_DIR -type f | while read f; do
+find "$PHOTO_DIR" -type f | while read f; do
 	printf "%s;" "$f"
 	identify -verbose "$f" 2>/dev/null | sed -nr 's/.*Date.*Original: ([0-9]{4}):([0-9]{2}):([0-9]{2}).*/\1;\2/p'
 	printf "\n"
