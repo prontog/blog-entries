@@ -3,9 +3,13 @@
 # Function to output usage information
 usage() {
   cat <<EOF
-Usage: ${0##*/} MEDIA_DIR
+Usage: ${0##*/} [OPTION]... MEDIA_DIR
 Script that recursively moves audio/video files from MEDIA_DIR into the current
-working dir in subdirs with format YEAR/MONTH (i.e 2019/10)
+working dir in subdirs with format YEAR/MONTH (i.e 2019/10) by default.
+
+Options:
+  -d        create dir for each day using the format YYYY_MM_DD
+  -h        display this help text and exit
 
 EOF
   exit 1
@@ -15,6 +19,17 @@ error() {
 	echo "${0##*/}: $*" >&2
 	exit 1
 }
+
+DATE_DIR=
+while getopts "hd" option
+do
+	case $option in
+        d) DATE_DIR=true;;
+		h) usage;;
+		*) usage;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
 
 MEDIA_DIR=$1
 if [[ ! -d $MEDIA_DIR ]]; then
@@ -26,10 +41,6 @@ find "$MEDIA_DIR" -type f | while read f; do
     mediainfo $f | sed -rn '/^General/,/^$/{s/Tagged date[[:space:]]*:.*([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1;\2/p}'
 	printf "\n"
 done | sed -u '/^$/d' | while IFS=';' read f y m; do
-	if ! [[ -f $f ]]; then
-        echo "Skipping (Not a file): $f" >&2
-        continue
-    fi
     if [[ -z $y ]]; then
         echo "Skipping (Year is empty): $f" >&2
         continue
@@ -38,7 +49,12 @@ done | sed -u '/^$/d' | while IFS=';' read f y m; do
         echo "Skipping (Month is empty): $f" >&2
         continue
     fi
+
+    DIR_PATH=./$y/$m
+    if [[ $DATE_DIR == true ]] && [[ -n $d ]]; then
+        DIR_PATH=$DIR_PATH/${y}_${m}_${d}
+    fi
 	echo "Moving: $f" >&2
-	mkdir -p ./$y/$m
-	mv "$f" ./$y/$m
+	mkdir -p $DIR_PATH
+	mv -n "$f" $DIR_PATH
 done
