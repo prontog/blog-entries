@@ -1,5 +1,5 @@
 
-Moving your photos using *ImageMagik*:
+Moving your photos using *exiftool*:
 ```bash
 ./organize_photos.sh /path/to/dir/with/photos/to/organize
 ```
